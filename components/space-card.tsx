@@ -28,7 +28,7 @@ export function SpaceCard({ space }: SpaceCardProps) {
 
   return (
     <Link
-      href={`/chinese/spaces/${space.id}`}
+      href={`/spaces/${space.id}`}
       className="group block border-b border-border last:border-b-0 px-4 py-4 transition-colors hover:bg-accent/50"
     >
       <div className="flex items-center justify-between gap-6">
