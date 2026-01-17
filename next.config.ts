@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // Remove 'standalone' output mode - not needed for Amplify SSR
+  // Amplify's WEB_COMPUTE platform handles the deployment automatically
 };
 
 export default nextConfig;
