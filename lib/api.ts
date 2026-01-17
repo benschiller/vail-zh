@@ -2,14 +2,6 @@ import { Space, SpacesListResponse, ReportResponse } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vail.report';
 
-function getBearerToken(): string {
-  const token = process.env.VAIL_API_BEARER_TOKEN;
-  if (!token) {
-    throw new Error('VAIL_API_BEARER_TOKEN environment variable is not set');
-  }
-  return token;
-}
-
 // Apply vail-zh global gate filter
 function applyGlobalGate(spaces: Space[]): Space[] {
   return spaces.filter(space => {
@@ -44,9 +36,6 @@ export async function fetchSpaces(limit: number = 20, pageToken?: string): Promi
     }
 
     const response = await fetch(url.toString(), {
-      headers: {
-        'Authorization': `Bearer ${getBearerToken()}`,
-      },
       cache: 'no-store', // Always fetch fresh data
     });
 
@@ -92,15 +81,9 @@ export async function fetchReport(spaceId: string): Promise<ReportResponse | nul
 
   const [reportResponse, spaceResponse] = await Promise.all([
     fetch(reportUrl, {
-      headers: {
-        'Authorization': `Bearer ${getBearerToken()}`,
-      },
       cache: 'no-store',
     }),
     fetch(spaceUrl, {
-      headers: {
-        'Authorization': `Bearer ${getBearerToken()}`,
-      },
       cache: 'no-store',
     }),
   ]);
@@ -153,6 +136,6 @@ export async function fetchReport(spaceId: string): Promise<ReportResponse | nul
 }
 
 export function getListenUrl(spaceId: string): string {
-  // Use proxy route that handles bearer auth to vail-core
-  return `/v0/listen/${spaceId}`;
+  // Direct call to vail-core listen endpoint (no auth required now)
+  return `${API_URL}/v0/spaces/${spaceId}/listen`;
 }
