@@ -7,6 +7,10 @@ import { fetchReport } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Metadata } from 'next';
 
+// Force dynamic rendering - data is fetched at request time, not build time
+// This is required because VAIL_API_BEARER_TOKEN is only available at runtime
+export const dynamic = 'force-dynamic';
+
 interface ReportPageProps {
   params: Promise<{ id: string }>;
 }

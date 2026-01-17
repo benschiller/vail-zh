@@ -3,6 +3,10 @@ import { Footer } from '@/components/footer';
 import { SpacesList } from '@/components/spaces-list';
 import { fetchSpaces } from '@/lib/api';
 
+// Force dynamic rendering - data is fetched at request time, not build time
+// This is required because VAIL_API_BEARER_TOKEN is only available at runtime
+export const dynamic = 'force-dynamic';
+
 export default async function ChineseSpacesPage() {
   try {
     console.log('[ChineseSpacesPage] Starting to fetch spaces...');
