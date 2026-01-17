@@ -16,3 +16,7 @@ frontend:
       - .npm/**/*
       - .next/cache/**/*
       - node_modules/**/*
+env:
+  variables:
+    VAIL_API_BEARER_TOKEN: $VAIL_API_BEARER_TOKEN
+    NEXT_PUBLIC_API_URL: $NEXT_PUBLIC_API_URL
