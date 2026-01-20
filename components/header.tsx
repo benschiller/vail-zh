@@ -20,7 +20,14 @@ export function Header() {
             </span>
           </div>
           <span className="font-mono text-xs text-muted-foreground">
-            Powered by VAIL API
+            Powered by <a
+    href="https://vail.report"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="font-mono hover:text-foreground transition-colors underline underline-offset-4"
+  >
+    VAIL API
+  </a>
           </span>
         </div>
         <Button
