@@ -13,10 +13,10 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-sm font-medium">VAIL • MVP</span>
+            <span className="font-mono text-sm font-medium">VAIL • ZH Edition</span>
             <span className="text-muted-foreground">|</span>
             <span className="text-sm text-muted-foreground">
-              Original Chinese Spaces → English Intelligence Reports
+              Chinese Twitter Spaces → English Market Intelligence
             </span>
           </div>
           <span className="font-mono text-xs text-muted-foreground">
