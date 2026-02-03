@@ -8,7 +8,6 @@ import {
   formatDate,
   getTotalListeners,
   getSpeakerCount,
-  formatHosts,
   getAdminDetails,
   getSpeakerDetails,
   formatDuration,
@@ -21,32 +20,34 @@ interface SpaceCardProps {
 export function SpaceCard({ space }: SpaceCardProps) {
   const totalListeners = getTotalListeners(space)
   const speakerCount = getSpeakerCount(space)
-  const hosts = formatHosts(space)
   const admins = getAdminDetails(space)
   const speakers = getSpeakerDetails(space)
   const duration = formatDuration(space)
 
   return (
-    <Link
-      href={`/spaces/${space.id}`}
-      className="group block border-b border-border last:border-b-0 px-4 py-4 transition-colors hover:bg-accent/50"
-    >
+    <div className="group block border-b border-border last:border-b-0 px-4 py-4 transition-colors hover:bg-accent/50">
       <div className="flex items-center justify-between gap-6">
         {/* Left: Title and metadata */}
         <div className="flex-1 min-w-0 space-y-2">
           <div className="space-y-1">
             {space.title_en && (
-              <h3 className="font-medium text-balance leading-tight group-hover:text-primary transition-colors">
+              <Link
+                href={`/spaces/${space.id}`}
+                className="font-medium text-balance leading-tight group-hover:text-primary transition-colors hover:underline"
+              >
                 {space.title_en}
-              </h3>
+              </Link>
             )}
-            <p
+            <Link
+              href={`/spaces/${space.id}`}
               className={
-                space.title_en ? "text-sm text-muted-foreground" : "font-medium text-balance"
+                space.title_en
+                  ? "text-sm text-muted-foreground hover:text-primary transition-colors hover:underline block"
+                  : "font-medium text-balance hover:text-primary transition-colors hover:underline"
               }
             >
               {space.title}
-            </p>
+            </Link>
           </div>
 
           {/* Metadata row */}
@@ -124,11 +125,14 @@ export function SpaceCard({ space }: SpaceCardProps) {
         </div>
 
         {/* Right: Action */}
-        <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
+        <Link
+          href={`/spaces/${space.id}`}
+          className="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors"
+        >
           <span className="text-sm font-medium hidden sm:inline">View Report</span>
           <ArrowRight className="size-5" />
-        </div>
+        </Link>
       </div>
-    </Link>
+    </div>
   )
 }

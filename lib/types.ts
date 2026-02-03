@@ -38,7 +38,7 @@ export interface Report {
   report_language: string;
   is_published: boolean;
   created_at: string;
-  report_data: ReportData;
+  report_data: ReportData | null;
 }
 
 export interface ReportData {

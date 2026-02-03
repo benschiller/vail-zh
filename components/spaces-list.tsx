@@ -5,6 +5,8 @@ import { Space } from '@/lib/types';
 import { SpaceCard } from './space-card';
 import { Button } from './ui/button';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vail.report';
+
 interface SpacesListProps {
   initialSpaces: Space[];
   initialNextPage: string | null;
@@ -23,7 +25,9 @@ export function SpacesList({ initialSpaces, initialNextPage }: SpacesListProps) 
     setError(null);
     
     try {
-      const response = await fetch(`/v0/spaces?page=${nextPage}`);
+      const url = new URL(`${API_URL}/v0/spaces`);
+      url.searchParams.set('page', nextPage);
+      const response = await fetch(url.toString());
       if (!response.ok) {
         throw new Error(`Failed to load more spaces: ${response.status} ${response.statusText}`);
       }

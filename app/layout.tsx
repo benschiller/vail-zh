@@ -48,6 +48,7 @@ export default function RootLayout({
           defer
           src="https://cloud.umami.is/script.js"
           data-website-id="339efaa5-cd57-4c72-991a-00875b7c4f88"
+          suppressHydrationWarning
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>

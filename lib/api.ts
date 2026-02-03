@@ -77,7 +77,7 @@ export async function fetchSpaces(limit: number = 20, pageToken?: string): Promi
 export async function fetchReport(spaceId: string): Promise<ReportResponse | null> {
   // Fetch both report and space data
   const reportUrl = `${API_URL}/v0/spaces/${spaceId}/report?include_meta=1`;
-  const spaceUrl = `${API_URL}/v0/spaces?space_id=${spaceId}&include_reports=1`;
+  const spaceUrl = `${API_URL}/v0/spaces/${spaceId}`;
 
   const [reportResponse, spaceResponse] = await Promise.all([
     fetch(reportUrl, {
@@ -113,9 +113,16 @@ export async function fetchReport(spaceId: string): Promise<ReportResponse | nul
   const reportData = await reportResponse.json();
   const spaceData = await spaceResponse.json();
   
+  // Validate that report data exists before processing
+  // New API returns report data in reportData.report_data
+  if (!reportData || !reportData.report_data || Object.keys(reportData.report_data).length === 0) {
+    console.error('[fetchReport] Report data is null for space:', spaceId);
+    return null;
+  }
+  
   // Find the specific space that matches the requested spaceId
-  // The API may return multiple spaces, so we need to find the correct one
-  const space = spaceData.data?.find((s: Space) => s.id === spaceId);
+  // The single space endpoint returns the space directly, list endpoint wraps in data array
+  const space = spaceData.data?.find((s: Space) => s.id === spaceId) || spaceData;
 
   if (!space) {
     console.error('[fetchReport] Space not found in response. Requested:', spaceId);
@@ -124,12 +131,12 @@ export async function fetchReport(spaceId: string): Promise<ReportResponse | nul
 
   return {
     report: {
-      id: spaceId,
-      space_id: spaceId,
-      report_language: reportData.meta?.report_language || 'en',
-      is_published: reportData.meta?.is_published || false,
+      id: reportData.id,
+      space_id: reportData.space_id,
+      report_language: reportData.report_language || 'en',
+      is_published: reportData.is_published,
       created_at: new Date().toISOString(),
-      report_data: reportData.report
+      report_data: reportData.report_data  // Extract report_data from the response
     },
     space: space  // Use the properly structured Space object
   };
