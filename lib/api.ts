@@ -10,12 +10,11 @@ function applyGlobalGate(spaces: Space[]): Space[] {
     const isCrypto = space.is_crypto === true;
     const isEnded = space.state === 'Ended' || space.state === 'TimedOut';
     
-    // Check if space has published English report
-    const hasPublishedEnglishReport = space.reports?.some(
-      report => report.report_language === 'en' && report.is_published === true
-    );
+    // Check if space has abstract (indicates report exists)
+    // New API v0: abstract moved to space level, reports array no longer embedded
+    const hasAbstract = space.abstract && space.abstract.length > 0;
 
-    return hasZhLanguage && isCrypto && isEnded && hasPublishedEnglishReport;
+    return hasZhLanguage && isCrypto && isEnded && hasAbstract;
   });
 }
 
@@ -75,8 +74,10 @@ export async function fetchSpaces(limit: number = 20, pageToken?: string): Promi
 }
 
 export async function fetchReport(spaceId: string): Promise<ReportResponse | null> {
-  // Fetch both report and space data
-  const reportUrl = `${API_URL}/v0/spaces/${spaceId}/report?include_meta=1`;
+  // New API v0: Simplified endpoint structure
+  // - /v0/spaces/{id}/report returns report_data directly (not wrapped)
+  // - /v0/spaces/{id} returns space object directly
+  const reportUrl = `${API_URL}/v0/spaces/${spaceId}/report`;
   const spaceUrl = `${API_URL}/v0/spaces/${spaceId}`;
 
   const [reportResponse, spaceResponse] = await Promise.all([
@@ -110,39 +111,37 @@ export async function fetchReport(spaceId: string): Promise<ReportResponse | nul
     throw new Error(`Failed to fetch space: ${spaceResponse.statusText}`);
   }
 
+  // New API v0: report endpoint returns report_data object directly
   const reportData = await reportResponse.json();
-  const spaceData = await spaceResponse.json();
+  const space: Space = await spaceResponse.json();
   
   // Validate that report data exists before processing
-  // New API returns report data in reportData.report_data
-  if (!reportData || !reportData.report_data || Object.keys(reportData.report_data).length === 0) {
+  if (!reportData || Object.keys(reportData).length === 0) {
     console.error('[fetchReport] Report data is null for space:', spaceId);
     return null;
   }
-  
-  // Find the specific space that matches the requested spaceId
-  // The single space endpoint returns the space directly, list endpoint wraps in data array
-  const space = spaceData.data?.find((s: Space) => s.id === spaceId) || spaceData;
 
-  if (!space) {
-    console.error('[fetchReport] Space not found in response. Requested:', spaceId);
-    return null;
-  }
+  // Ensure abstract is available in report_data (it's also in space.abstract)
+  // Prefer report_data.abstract if present, otherwise use space.abstract
+  const abstract = reportData.abstract || space.abstract || [];
 
   return {
     report: {
-      id: reportData.id,
-      space_id: reportData.space_id,
-      report_language: reportData.report_language || 'en',
-      is_published: reportData.is_published,
-      created_at: new Date().toISOString(),
-      report_data: reportData.report_data  // Extract report_data from the response
+      id: space.id, // Use space ID as report ID (no separate report ID in new structure)
+      space_id: spaceId,
+      report_language: 'en', // Default to English for vail-zh
+      is_published: true,
+      created_at: space.created_at ? new Date(space.created_at).toISOString() : new Date().toISOString(),
+      report_data: {
+        ...reportData,
+        abstract, // Ensure abstract is included
+      }
     },
-    space: space  // Use the properly structured Space object
+    space: space
   };
 }
 
 export function getListenUrl(spaceId: string): string {
-  // Direct call to vail-core listen endpoint (no auth required now)
-  return `${API_URL}/v0/spaces/${spaceId}/listen`;
+  // Use our internal API route to proxy the request (avoids CORS issues)
+  return `/api/spaces/${spaceId}/listen`;
 }

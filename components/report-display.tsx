@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import type { Report, Space } from "@/lib/types"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
@@ -26,6 +29,26 @@ export function ReportDisplay({ report, space }: ReportDisplayProps) {
   const hosts = space ? formatHosts(space) : ""
   const admins = space ? getAdminDetails(space) : []
   const speakers = space ? getSpeakerDetails(space) : []
+  const [isLoadingUrl, setIsLoadingUrl] = useState(false)
+
+  const handleListenClick = async () => {
+    if (!space) return
+    
+    setIsLoadingUrl(true)
+    try {
+      const response = await fetch(getListenUrl(space.id))
+      if (response.ok) {
+        const data = await response.json()
+        if (data.listen_url) {
+          window.open(data.listen_url, '_blank', 'noopener,noreferrer')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch listen URL:', error)
+    } finally {
+      setIsLoadingUrl(false)
+    }
+  }
 
   // Handle missing report data
   if (!reportData) {
@@ -88,10 +111,8 @@ export function ReportDisplay({ report, space }: ReportDisplayProps) {
               <Users className="size-4" />
               <span>{totalListeners.toLocaleString()} listeners</span>
             </div>
-            <Button size="sm" asChild>
-              <a href={getListenUrl(space.id)} target="_blank" rel="noopener noreferrer">
-                Listen on X
-              </a>
+            <Button size="sm" onClick={handleListenClick} disabled={isLoadingUrl}>
+              {isLoadingUrl ? 'Loading...' : 'Listen on X'}
             </Button>
           </div>
 

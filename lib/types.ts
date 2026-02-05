@@ -30,6 +30,14 @@ export interface Space {
     speakers: Participant[];
   } | null;
   reports?: Report[];
+  // New API v0 fields
+  abstract?: string[];  // Abstract paragraphs moved to space level
+  audio_url?: string;  // Direct link to audio file
+  m3u8_url?: string;  // HLS stream URL
+  transcription_id?: string;  // UUID linking to transcript
+  transcription_service?: string;  // Provider used (e.g., "deepgram")
+  created_at?: number;  // Record creation timestamp
+  updated_at?: number;  // Last update timestamp
 }
 
 export interface Report {
