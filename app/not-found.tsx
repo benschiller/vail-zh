@@ -26,7 +26,7 @@ export default function NotFound() {
             Go to Home
           </Link>
           <Link
-            href="/chinese"
+            href="/"
             className="px-6 py-3 border border-gray-700 text-white rounded-lg font-medium hover:bg-gray-900 transition-colors duration-200"
           >
             Browse Spaces
