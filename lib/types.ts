@@ -84,7 +84,6 @@ export interface MarketSentiment {
 
 export interface SpacesListResponse {
   spaces: Space[];
-  next_page: string | null;
 }
 
 export interface ReportResponse {

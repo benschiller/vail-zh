@@ -10,14 +10,14 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   try {
     console.log('[HomePage] Starting to fetch spaces...');
-    const { spaces, next_page } = await fetchSpaces(20);
+    const { spaces } = await fetchSpaces();
     console.log('[HomePage] Fetched', spaces.length, 'spaces');
 
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
-          <SpacesList initialSpaces={spaces} initialNextPage={next_page} />
+          <SpacesList spaces={spaces} />
         </main>
         <Footer />
       </div>

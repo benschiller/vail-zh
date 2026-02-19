@@ -18,59 +18,36 @@ function applyGlobalGate(spaces: Space[]): Space[] {
   });
 }
 
-export async function fetchSpaces(limit: number = 20, pageToken?: string): Promise<SpacesListResponse> {
-  let allFilteredSpaces: Space[] = [];
-  let currentPageToken = pageToken;
-  let hasMorePages = true;
-  
-  // Keep fetching until we have enough filtered results or no more pages
-  while (allFilteredSpaces.length < limit && hasMorePages) {
-    const url = new URL(`${API_URL}/v0/spaces`);
-    // Request more than needed to account for filtering
-    url.searchParams.set('limit', Math.max(limit * 2, 40).toString());
-    url.searchParams.set('include_reports', '1');
-    
-    if (currentPageToken) {
-      url.searchParams.set('page', currentPageToken);
-    }
+export async function fetchSpaces(): Promise<SpacesListResponse> {
+  const url = new URL(`${API_URL}/v0/spaces`);
+  // Fetch a generous batch — only a handful of zh-crypto spaces exist
+  url.searchParams.set('limit', '100');
+  url.searchParams.set('include_reports', '1');
 
-    const response = await fetch(url.toString(), {
-      cache: 'no-store', // Always fetch fresh data
-    });
+  const response = await fetch(url.toString(), {
+    cache: 'no-store', // Always fetch fresh data
+  });
 
-    if (!response.ok) {
-      console.error('[lib/api.ts] Failed to fetch spaces:', response.status, response.statusText);
-      throw new Error(`Failed to fetch spaces: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    // API returns { data: [...], next_page: ... }
-    const spaces = data.data || [];
-    const filteredSpaces = applyGlobalGate(spaces);
-    
-    allFilteredSpaces = [...allFilteredSpaces, ...filteredSpaces];
-    currentPageToken = data.next_page;
-    hasMorePages = !!data.next_page;
-    
-    // If we got no filtered results from this page, continue to next page
-    // unless there are no more pages
-    if (filteredSpaces.length === 0 && !hasMorePages) {
-      break;
-    }
+  if (!response.ok) {
+    console.error('[lib/api.ts] Failed to fetch spaces:', response.status, response.statusText);
+    throw new Error(`Failed to fetch spaces: ${response.statusText}`);
   }
 
-  // Return only the requested number of spaces
-  const resultSpaces = allFilteredSpaces.slice(0, limit);
-  
-  // Determine if there are more pages available
-  // We have more if: we got more filtered results than requested, or there are more API pages
-  const hasMore = allFilteredSpaces.length > limit || hasMorePages;
+  const data = await response.json();
 
-  return {
-    spaces: resultSpaces,
-    next_page: hasMore ? (currentPageToken || null) : null,
-  };
+  // API returns { data: [...], next_page: ... }
+  const spaces: Space[] = data.data || [];
+  const filteredSpaces = applyGlobalGate(spaces);
+
+  // Deduplicate by space.id as a safety net
+  const seen = new Set<string>();
+  const uniqueSpaces = filteredSpaces.filter(space => {
+    if (seen.has(space.id)) return false;
+    seen.add(space.id);
+    return true;
+  });
+
+  return { spaces: uniqueSpaces };
 }
 
 export async function fetchReport(spaceId: string): Promise<ReportResponse | null> {
